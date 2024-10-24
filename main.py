@@ -57,6 +57,7 @@ app = FastAPI()
 engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+Base.metadata.create_all(bind=engine)
 def get_db():
     db = SessionLocal()
     try:
@@ -75,7 +76,7 @@ def get_password_hash(password):
 
 
 def get_user(db: Session, email: str):
-    return db.query(UsuarioInDB).filter(Usuario.email == email)
+    return db.query(UsuarioInDB).filter(Usuario.email == email).first()
     # if email in db:
     #     user_dict = db[email]
     #     return UsuarioInDB(**user_dict)
@@ -99,27 +100,27 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
 # Rotas
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str):
-    return {"item_id": item_id, "q": q}
-
 @app.post("/registrar")
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)) -> Token:
-    user = authenticate_user(db, form_data.email, form_data.password)
-    if not user:
+async def login_for_access_token(nome: str, email: str, senha: str, db: Session = Depends(get_db)) -> Token:
+    user = get_user(db, email)
+    if user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="User already exists",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+    senha = get_password_hash(senha)
+    novo_user = UsuarioInDB(email=email, nome=nome, senha=senha)
+    db.add(novo_user)
+    db.flush(novo_user)
+    db.commit()
+    db.refresh(novo_user)
+    
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
+        data={"sub": novo_user.email}, expires_delta=access_token_expires
     )
-    return Token(hwt=access_token)
+    return {"jwt": access_token}
