@@ -77,17 +77,9 @@ def get_password_hash(password):
 
 def get_user(db: Session, email: str):
     return db.query(UsuarioInDB).filter(Usuario.email == email).first()
-    # if email in db:
-    #     user_dict = db[email]
-    #     return UsuarioInDB(**user_dict)
     
-def authenticate_user(db: Session, email: str, password: str):
-    user = get_user(db, email)
-    if not user:
-        return False
-    if not verify_password(password, user.hashed_password):
-        return False
-    return user
+def authenticate_user(password: str, user: UsuarioInDB):
+    return verify_password(password, user.hashed_password)
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -103,13 +95,12 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 # Rotas
 @app.post("/registrar")
-async def login_for_access_token(nome: str, email: str, senha: str, db: Session = Depends(get_db)) -> Token:
+async def register_new_user(nome: str, email: str, senha: str, db: Session = Depends(get_db)) -> Token:
     user = get_user(db, email)
     if user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="User already exists",
-            headers={"WWW-Authenticate": "Bearer"},
+            detail="User já existe"
         )
     
     senha = get_password_hash(senha)
@@ -122,5 +113,19 @@ async def login_for_access_token(nome: str, email: str, senha: str, db: Session 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": novo_user.email}, expires_delta=access_token_expires
+    )
+    return {"jwt": access_token}
+
+@app.post("/login")
+async def login_user(email: str, senha: str, db: Session = Depends(get_db)) -> Token:
+    user = get_user(db, email)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User não existe")
+    if not authenticate_user(senha, user):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Senha incorreta")
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires
     )
     return {"jwt": access_token}
