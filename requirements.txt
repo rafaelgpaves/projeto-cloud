@@ -1,0 +1,8 @@
+uvicorn
+starlette
+pydantic
+fastapi[standard]
+sqlmodel
+sqlalchemy
+PyMySQL[rsa]
+cryptography
