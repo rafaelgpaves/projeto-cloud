@@ -6,3 +6,5 @@ sqlmodel
 sqlalchemy
 PyMySQL[rsa]
 cryptography
+pyjwt
+passlib[bcrypt]
