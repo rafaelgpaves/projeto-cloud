@@ -92,8 +92,8 @@ def get_password_hash(password):
 def get_user(db: Session, email: str):
     return db.query(User).filter(User.email == email).first()
     
-def authenticate_user(password: str, user: UsuarioInDB):
-    return verify_password(password, user.hashed_password)
+def authenticate_user(password: str, user: User):
+    return verify_password(password, user.senha)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
