@@ -8,3 +8,5 @@ PyMySQL[rsa]
 cryptography
 pyjwt
 passlib[bcrypt]
+psycopg2
+requests
