@@ -2,8 +2,9 @@
 import os
 import datetime
 from datetime import timedelta, timezone
+import time
 from typing import Annotated, Optional
-from fastapi import Depends, FastAPI, HTTPException, Header, status
+from fastapi import Depends, FastAPI, HTTPException, Header, Request, status
 import jwt
 from pydantic import BaseModel
 from sqlalchemy import Integer, String, create_engine, Column
@@ -11,7 +12,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import requests
 from jwt.exceptions import InvalidTokenError
 
@@ -37,7 +38,7 @@ if DB_USERNAME and DB_PASSWORD and DB_SERVER and DB_PORT and DB_NAME:
 # Essenciais (setup)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -80,6 +81,44 @@ class UsuarioLogin(BaseModel):
     email: str
     senha: str
 
+class UsuarioPublic(BaseModel):
+    email: str
+    nome: str
+    senha: str
+
+def decodeJWT(token: str) -> dict:
+    try:
+        decoded_token = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return decoded_token if decoded_token["exp"] >= time.time() else None
+    except:
+        return {}
+
+class JWTBearer(HTTPBearer):
+    def __init__(self, auto_error: bool = True):
+        super(JWTBearer, self).__init__(auto_error=auto_error)
+
+    async def __call__(self, request: Request):
+        credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
+        if credentials:
+            if not credentials.scheme == "Bearer":
+                raise HTTPException(status_code=403, detail="Schema inválido de autenticação.")
+            if not self.verify_jwt(credentials.credentials):
+                raise HTTPException(status_code=403, detail="Token inválido ou expirado.")
+            return credentials.credentials
+        else:
+            raise HTTPException(status_code=403, detail="Código de autorização inválido.")
+
+    def verify_jwt(self, jwtoken: str) -> bool:
+        isTokenValid: bool = False
+
+        try:
+            payload = decodeJWT(jwtoken)
+        except:
+            payload = None
+        if payload:
+            isTokenValid = True
+        return isTokenValid
+
 # Funcoes
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -106,23 +145,18 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+async def get_current_user(token: Annotated[str, Depends(JWTBearer())], db: Session = Depends(get_db)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+        token_data = TokenData(email=email)
     except InvalidTokenError:
-        raise credentials_exception
-    user = get_user(db, username=token_data.email)
+        return None
+    user = get_user(db, email=token_data.email)
     if user is None:
-        raise credentials_exception
+        return None
     return user
 
 # APP START
@@ -140,9 +174,7 @@ async def register_new_user(usuario: UsuarioCreate, db: Session = Depends(get_db
         )
     
     nova_senha = get_password_hash(usuario.senha)
-    print("AAAAAAAAAAAAAAAAAAA", usuario.senha, nova_senha)
     novo_user = User(email=usuario.email, nome=usuario.nome, senha=nova_senha)
-    print(novo_user.email)
     db.add(novo_user)
     db.flush()
     db.commit()
@@ -169,9 +201,15 @@ async def login_user(usuario: UsuarioLogin, db: Session = Depends(get_db)) -> To
     return Token(jwt=access_token)
 
 @app.get("/consulta")
-async def consultar_api(user: Annotated[UsuarioInDB, Depends(get_current_user), Header()]):
-    response = await requests.get("https://cat-fact.herokuapp.com/facts")
-    if response.status_code == 200:
-        print(response.json())
+def consultar_api(user: Annotated[UsuarioInDB, Depends(get_current_user)]):
+    # return user
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Usuário não pode ser validado"
+        )
+    resposta = requests.get("https://pokeapi.co/api/v2/pokemon/ditto")
+    if resposta.status_code == 200:
+        return resposta.json()
     else:
-        print(f"Error: {response.status_code}")
+        return {"Reponse Code": resposta.status_code}
