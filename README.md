@@ -65,6 +65,9 @@ Um exemplo de resultado:
 
 ## Links
 
+Vídeo mostrando as rotas:
+[![Vídeo mostrando as rotas](./img/printscreen.png)](./img/demo.mp4)
+
 [Link para o DockerHub da imagem](https://hub.docker.com/repository/docker/rafaelgp3/projetocloud-fastapi/general)
 
 [Compose.yaml](./compose.yaml)
