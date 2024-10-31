@@ -23,9 +23,6 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-projeto} 
       - POSTGRES_USER=${POSTGRES_USER:-projeto}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-projeto}
-      # - DB_SERVER=${DB_SERVER:-db}
-      # - DB_PORT=${DB_PORT:-5432}
-      # - DATABASE_URL=postgresql://${DB_USERNAME:-projeto}:${DB_PASSWORD:-projeto}@db:5432/${DB_NAME:-projeto}
     ports:
       - 8000:8000
     depends_on:
