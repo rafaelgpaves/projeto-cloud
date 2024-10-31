@@ -4,9 +4,11 @@ Desenvolvido por Rafael Gordon Paves.
 
 ## Sobre o projeto
 
-Nesse projeto, foi feita uma API conectada a um banco de dados Postgres, em uma aplicação conteinerizada.
+Nesse projeto, foi feita uma API conectada a um banco de dados Postgres, em uma aplicação conteinerizada, com o intuito de aprender conceitos como Docker, autenticação JWT, AWS, APIs, entre outros. 
 
 Um dos requisitos era fazer um web scraping ou usar uma api atualizada regularmente. Neste projeto, escolhi [Jikan](https://jikan.moe/), uma api com dados de animes, mangás, personagens, produtoras, usuários, entre outros que estão no site MyAnimeList.
+
+Neste repositório, por enquanto, está presente apenas a etapa 1. A próxima etapa (com a inclusão da AWS) será incluida em breve.
 
 ## Executando a aplicação
 
@@ -62,6 +64,29 @@ Coloque o token obtido anteriormente:
 Um exemplo de resultado:
 
 ![/consulta_result](./img/consulta_result.png)
+
+
+## Dockerização
+
+Para criar a imagem, foram feitos esses passos:
+
+
+
+Entrar no diretório com a `Dockerfile`:
+```
+cd app
+```
+
+Usar dockerx (para criar imagens para múltiplas arquiteturas):
+```
+docker buildx create --use
+```
+
+Criar a imagem e dar push para o DockerHub:
+```
+docker buildx build --platform linux/amd64,linux/ar64 -t rafaelgp3/projetocloud-fastapi:v1.0 -t rafaelgp3/projetocloud-fastapi:latest . --push
+```
+
 
 ## Links
 
