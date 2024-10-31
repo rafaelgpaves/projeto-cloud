@@ -42,7 +42,7 @@ Exemplo de resultado:
 - Em sucesso, devolve um token jwt, com expiração de 30 minutos, no formato {"jwt": ${token}}
 
 
-Exemplo de corpo da requisição
+Exemplo de corpo da requisição:
 ![/login](./img/login_body.png)
 Exemplo de resultado:
 ![alt text](./img/login_result.png)
@@ -66,7 +66,7 @@ Um exemplo de resultado:
 ## Links
 
 Vídeo mostrando as rotas:
-[![Vídeo mostrando as rotas](./img/printscreen.png)](./img/demo.mp4)
+![](./img/demo.gif)
 
 [Link para o DockerHub da imagem](https://hub.docker.com/repository/docker/rafaelgp3/projetocloud-fastapi/general)
 
