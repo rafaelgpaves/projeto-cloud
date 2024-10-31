@@ -10,12 +10,9 @@ Um dos requisitos era fazer um web scraping ou usar uma api atualizada regularme
 
 ## Executando a aplicação
 
-1. Puxe a imagem:
-```
-docker pull rafaelgp3/
-``` 
+1. Baixe o [compose.yaml](./compose.yaml):
 
-2. Rode o conteiner:
+2. No mesmo diretório do compose.yaml, rode o conteiner:
 ```
 docker compose up
 ```
@@ -30,48 +27,44 @@ docker compose down
 
 ## Rotas
 
-POST /registrar
+**POST /registrar**
 - Requer no corpo da requisição 3 chaves: "email", "nome" e "senha".
 - Em sucesso, devolve um token jwt, com expiração de 30 minutos, no formato {"jwt": ${token}}
-- Um exemplo usando curl:
 
-```terminal
-curl -X 'POST' \
-  'http://127.0.0.1:8000/registrar' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "email": "rafaelgpaves@gmail.com",
-  "nome": "Rafael",
-  "senha": "senhasupersecreta"
-}'
-```
 
-POST /login
+Exemplo de corpo da requisição:
+![/registrar](./img/register_body.png)
+Exemplo de resultado:
+![/registrar_resultado](./img/registrar_result.png)
+
+**POST /login**
 - Requer no corpo da requisição 2 chaves: "email" e "senha".
 - Em sucesso, devolve um token jwt, com expiração de 30 minutos, no formato {"jwt": ${token}}
-- Um exemplo usando curl:
 
-```terminal
-curl -X 'POST' \
-  'http://127.0.0.1:8000/login' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-  "email": "rafaelgpaves@gmail.com",
-  "senha": "senhasupersecreta"
-}'
-```
 
-GET /consulta
+Exemplo de corpo da requisição
+![/login](./img/login_body.png)
+Exemplo de resultado:
+![alt text](./img/login_result.png)
+
+**GET /consulta**
 - Requer no cabeçalho um token jwt válido (obtido a partir das rotas registrar ou login)
-- Em sucesso, devolve dados de um anime aleatório da API mencionada anteriormente pela rota https://api.jikan.moe/v4/random/anime. Alguns dados retornados incluem o nome do anime, data de lançamento, link para o trailer, sinopse, estúdio que produziu, entre outros.
-- Um exemplo usando curl (não coloque '$', '{', '}', apenas o token):
+- Em sucesso, devolve dados de um anime aleatório da API mencionada anteriormente pela rota https://api.jikan.moe/v4/random/anime. Alguns dados retornados incluem o nome do anime, data de lançamento, gêneros, sinopse, estúdio que produziu, entre outros.
 
-```
-curl -X 'GET' \
-  'http://127.0.0.1:8000/consulta' \
-  -H 'accept: application/json' \
-  -H 'Authorization: Bearer ${token}'
-}'
-```
+Clique no cadeado para autenticação:
+
+![/consulta_cadeado](./img/consulta_cadeado.png)
+
+Coloque o token obtido anteriormente:
+
+![/consulta_header](./img/consulta_header.png)
+
+Um exemplo de resultado:
+
+![/consulta_result](./img/consulta_result.png)
+
+## Links
+
+[Link para o DockerHub da imagem](https://hub.docker.com/repository/docker/rafaelgp3/projetocloud-fastapi/general)
+
+[Compose.yaml](./compose.yaml)
