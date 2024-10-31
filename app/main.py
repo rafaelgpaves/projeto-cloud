@@ -21,15 +21,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DB_USERNAME = os.getenv("DB_USERNAME")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_SERVER = os.getenv("DB_SERVER")
-DB_PORT = os.getenv("DB_PORT")
-DB_NAME = os.getenv("DB_NAME")
+DB_USERNAME = os.getenv("POSTGRES_USER")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+DB_SERVER = "db"
+DB_PORT = 5432
+DB_NAME = os.getenv("POSTGRES_DB")
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
+SECRET_KEY = "13d9e823b00a02e37a52ed719c21ff31380bd402b8f8a13eae3f90bc0d692500"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 DATABASE_URL = None
 if DB_USERNAME and DB_PASSWORD and DB_SERVER and DB_PORT and DB_NAME:
@@ -208,7 +208,7 @@ def consultar_api(user: Annotated[UsuarioInDB, Depends(get_current_user)]):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Usuário não pode ser validado"
         )
-    resposta = requests.get("https://pokeapi.co/api/v2/pokemon/ditto")
+    resposta = requests.get("https://api.jikan.moe/v4/random/anime")
     if resposta.status_code == 200:
         return resposta.json()
     else:
