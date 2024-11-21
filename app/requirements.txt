@@ -1,0 +1,12 @@
+uvicorn
+starlette
+pydantic
+fastapi[standard]
+sqlmodel
+sqlalchemy
+PyMySQL[rsa]
+cryptography
+pyjwt
+passlib[bcrypt]
+psycopg2
+requests
