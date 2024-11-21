@@ -120,9 +120,6 @@ docker buildx build --platform linux/amd64,linux/ar64 -t rafaelgp3/projetocloud-
 
 [Vídeo mostrando as rotas](https://youtu.be/KObsd64bpaA)
 
-Ou veja um gif:
-![](./img/demo.gif)
-
 [Link para o DockerHub da imagem](https://hub.docker.com/repository/docker/rafaelgp3/projetocloud-fastapi/general)
 
 [Compose.yaml](https://github.com/rafaelgpaves/projeto-cloud/blob/main/compose.yaml)

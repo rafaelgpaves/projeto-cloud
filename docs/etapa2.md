@@ -7,3 +7,5 @@ Na segunda etapa, foi implementada nossa aplicação feita para a etapa 1 na AWS
 [Vídeo mostrando requisitos](https://www.youtube.com/watch?v=0gqp7cOsB5Y)
 
 [Link para a aplicação deployada na AWS](http://ac37cd3e880d744eebca8275df09444d-1658122767.us-west-2.elb.amazonaws.com/docs)
+
+[deployment.yaml](https://github.com/rafaelgpaves/projeto-cloud/blob/main/k8s/deployment.yaml)
